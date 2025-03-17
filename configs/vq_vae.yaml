@@ -1,0 +1,10 @@
+batch_size: 256
+epochs: 50
+learning_rate: 0.0001  
+z_dim: 40  
+hidden_dim: 400
+log_interval: 10
+seed: 1
+model_name: "vq_vae"
+num_embeddings: 512
+commitment_cost: 0.5  

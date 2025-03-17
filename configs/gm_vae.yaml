@@ -1,0 +1,9 @@
+batch_size: 256
+epochs: 10
+learning_rate: 0.001
+z_dim: 20
+hidden_dim: 400
+log_interval: 10
+seed: 1
+model_name: "gm_vae"
+num_components: 10
