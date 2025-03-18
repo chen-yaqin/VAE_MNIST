@@ -2,17 +2,51 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from models.vq import VectorQuantizer, VectorQuantizerEMA
+
+class ResBlock(nn.Module):
+    def __init__(self, hidden_dim):
+        super(ResBlock, self).__init__()
+        self.fc1 = nn.Linear(hidden_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim)
+
+    def forward(self, x):
+        res = x  
+        out = F.relu(self.fc1(x))
+        out = self.fc2(out)
+        out += res 
+        return F.relu(out)
+    
+class ResBlock_Conv(nn.Module):
+    def __init__(self, in_channels):
+        super(ResBlock_Conv, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=1, padding=1)
+    
+    def forward(self, x):
+        res = x  
+        out = F.relu(self.conv1(x))
+        out = self.conv2(out)
+        out += res  
+        return F.relu(out)
+    
 class VAE(nn.Module):
     def __init__(self, input_dim=784, hidden_dim=400, latent_dim=20):
         super(VAE, self).__init__()
         self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.resblock1 = ResBlock(hidden_dim)
         self.fc21 = nn.Linear(hidden_dim, latent_dim)  # Mean
         self.fc22 = nn.Linear(hidden_dim, latent_dim)  # Log-variance
         self.fc3 = nn.Linear(latent_dim, hidden_dim)
-        self.fc4 = nn.Linear(hidden_dim, input_dim)
+        self.resblock2 = ResBlock(hidden_dim)
+        self.fc4 = nn.Sequential(
+                    nn.Linear(hidden_dim, input_dim),
+                    # nn.BatchNorm1d(input_dim)  # 归一化
+                    )
+
 
     def encode(self, x):
         h1 = F.relu(self.fc1(x))
+        h1 = self.resblock1(h1)
         return self.fc21(h1), self.fc22(h1)
 
     def reparameterize(self, mu, logvar):
@@ -22,6 +56,7 @@ class VAE(nn.Module):
 
     def decode(self, z):
         h3 = F.relu(self.fc3(z))
+        h3 = self.resblock2(h3)
         return torch.sigmoid(self.fc4(h3))
 
     def forward(self, x):
@@ -42,8 +77,10 @@ class VAE_Conv(nn.Module):
         self.encoder = nn.Sequential(
             nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1),  # (28x28) -> (14x14)
             nn.ReLU(),
+            # ResBlock_Conv(32),
             nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1),  # (14x14) -> (7x7)
             nn.ReLU(),
+            # ResBlock_Conv(64),
             nn.Flatten(),  
             nn.Linear(64*7*7, 256),
             nn.ReLU()
@@ -58,8 +95,10 @@ class VAE_Conv(nn.Module):
             nn.Linear(256, 64*7*7),
             nn.ReLU(),
             nn.Unflatten(1, (64, 7, 7)), 
+            # ResBlock_Conv(64),
             nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),  # (7x7) -> (14x14)
             nn.ReLU(),
+            # ResBlock_Conv(32),
             nn.ConvTranspose2d(32, 1, kernel_size=4, stride=2, padding=1),  # (14x14) -> (28x28)
             nn.Sigmoid()
         )
@@ -96,13 +135,16 @@ class beta_VAE(nn.Module):
         super(beta_VAE, self).__init__()
         self.beta = beta
         self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.resblock1 = ResBlock(hidden_dim)
         self.fc21 = nn.Linear(hidden_dim, latent_dim)  # Mean
         self.fc22 = nn.Linear(hidden_dim, latent_dim)  # Log-variance
         self.fc3 = nn.Linear(latent_dim, hidden_dim)
+        self.resblock2 = ResBlock(hidden_dim)
         self.fc4 = nn.Linear(hidden_dim, input_dim)
 
     def encode(self, x):
         h1 = F.relu(self.fc1(x))
+        # h1 = self.resblock1(h1)
         return self.fc21(h1), self.fc22(h1)
 
     def reparameterize(self, mu, logvar):
@@ -112,6 +154,7 @@ class beta_VAE(nn.Module):
 
     def decode(self, z):
         h3 = F.relu(self.fc3(z))
+        # h3 = self.resblock2(h3)
         return torch.sigmoid(self.fc4(h3))
 
     def forward(self, x):
