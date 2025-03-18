@@ -27,7 +27,7 @@ I evaluate the following autoencoder architectures:
    - `beta_vae_0.5`: beta=0.5  
 
 ### 3. **Other Autoencoder Variants**
-   - **WAE** (Wasserstein Autoencoder): Focuses on **distribution matching** instead of KL divergence.  
+   - **WAE** (Wasserstein Autoencoder): Focuses on distribution matching instead of KL divergence.  
    - **GM-VAE** (Gaussian Mixture VAE): Uses a mixture of Gaussian priors to model latent space.
 
 ---
@@ -83,6 +83,7 @@ I evaluate each model using two key metrics:
 ### **2. Convolutional VAE**
 - **`vae_conv`** performs well in FID (50.13) but has higher MSE (0.0236) due to its limited training epochs.  
 - Training is slower due to convolutional layers, and 10 epochs may not be enough for full convergence.
+- MSE loss is used for convolutional VAE training, because BCE loss is observed to perform poorly.
 
 ### **3. Effect of beta in beta-VAEs**
 - Higher beta values (e.g., beta=4, beta=2) increase KL weight, penalizing reconstruction loss and leading to worse MSE but potentially better disentanglement.  
@@ -90,13 +91,13 @@ I evaluate each model using two key metrics:
 
 ### **4. WAE & GM-VAE**
 - Both excel in reconstruction (lowest MSE: 0.0090-0.0092) but fail in generation (high FID).  
-- WAE behaves more like an AE due to its architecture.  
+- WAE behaves more like an AE due to its architecture, so its generative capability is poor.  
 - GM-VAE likely suffers from overfitting, leading to poor generalization despite strong reconstruction.
 
 ### **5. Additional Experiment: VQ-VAE**
 - Training VQ-VAE was unstable and required extra tuning.  
 - EMA optimization improved stability but required more epochs to converge (more than 10 epochs).  
-- Due to limited compute resources, the full results are not included in this analysis, but code is available in [`models/vae.py`](models/vae.py) and [`models/vq.py`](models/vq.py).
+- Due to limited compute resources and time constraints, the full results are not included in this analysis, but code is available in [`models/vae.py`](models/vae.py) and [`models/vq.py`](models/vq.py).
 
 ---
 
