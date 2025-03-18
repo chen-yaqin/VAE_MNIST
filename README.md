@@ -11,20 +11,20 @@ All models were trained on the MNIST dataset with the following hyperparameters:
 - **Batch Size:** 256  
 - **Learning Rate:** 0.001  
 - **Epochs:** 10  
-- **Latent Dimension (\(z\))**: 20 (unless specified)  
+- **Latent Dimension (z)**: 20 (unless specified)  
 
 We evaluate the following autoencoder architectures:
 
 ### 1. **Variational Autoencoders (VAEs)**
-   - `vae_std_z20`: A standard VAE ([PyTorch implementation](https://github.com/pytorch/examples/blob/main/vae/main.py)) with \(z=20\).
+   - `vae_std_z20`: A standard VAE ([PyTorch implementation](https://github.com/pytorch/examples/blob/main/vae/main.py)) with z=20.
    - `vae_std_z20_res`: A VAE with residual connections added to the encoder.
-   - `vae_std_z40`: A larger latent space version (\(z=40\)).
+   - `vae_std_z40`: A larger latent space version (z=40).
    - `vae_conv`: A convolutional VAE.
 
-### 2. **\(\beta\)-VAEs**
-   - `beta_vae_4`: \(\beta=4\)  
-   - `beta_vae_2`: \(\beta=2\)  
-   - `beta_vae_0.5`: \(\beta=0.5\)  
+### 2. **beta-VAEs**
+   - `beta_vae_4`: beta=4  
+   - `beta_vae_2`: beta=2 
+   - `beta_vae_0.5`: beta=0.5  
 
 ### 3. **Other Autoencoder Variants**
    - **WAE** (Wasserstein Autoencoder): Focuses on **distribution matching** instead of KL divergence.  
@@ -36,13 +36,8 @@ We evaluate the following autoencoder architectures:
 
 We evaluate each model using two key metrics:
 
-1. **FID (Fréchet Inception Distance)**  
-   - Measures the quality of generated images by comparing their feature distributions with real images.  
-   - Lower is better.
-
-2. **MSE (Mean Squared Error)**  
-   - Measures reconstruction accuracy between input and output images.  
-   - Lower is better.
+1. **MSE (Mean Squared Error)**: Measures reconstruction accuracy between input and output images.  
+2. **FID (Fréchet Inception Distance)**: Measures the quality of generated images. 
 
 ---
 
@@ -89,9 +84,9 @@ We evaluate each model using two key metrics:
 - **`vae_conv`** performs well in FID (50.13) but has higher MSE (0.0236) due to its limited training epochs.  
 - Training is slower due to convolutional layers, and 10 epochs may not be enough for full convergence.
 
-### **3. Effect of \(\beta\) in \(\beta\)-VAEs**
-- Higher \(\beta\) values (e.g., \(\beta=4\), \(\beta=2\)) increase KL weight, penalizing reconstruction loss and leading to worse MSE but potentially better disentanglement.  
-- Lower \(\beta\) (\(\beta=0.5\)) leads to better reconstruction (MSE = 0.0116) but does not significantly improve generation (high FID).  
+### **3. Effect of beta in beta-VAEs**
+- Higher beta values (e.g., beta=4, beta=2) increase KL weight, penalizing reconstruction loss and leading to worse MSE but potentially better disentanglement.  
+- Lower beta (beta=0.5) leads to better reconstruction (MSE = 0.0116) but does not significantly improve generation (high FID).  
 
 ### **4. WAE & GM-VAE**
 - Both excel in reconstruction (lowest MSE: 0.0090-0.0092) but fail in generation (high FID).  
@@ -107,7 +102,6 @@ We evaluate each model using two key metrics:
 
 ## Conclusion
 
-
 - For small datasets like MNIST, simpler models may generalize better and avoid overfitting.  
 - If reconstruction is the primary goal, an AE (like WAE) is preferable to a VAE.  
 - If generation quality matters, VAEs with residuals perform best.
@@ -115,4 +109,13 @@ We evaluate each model using two key metrics:
 This study highlights the inherent tradeoff between reconstruction fidelity and generative diversity. The choice of model should depend on whether the primary focus is high-quality generation (low FID) or accurate reconstruction (low MSE).
 
 ---
+
+## Additional Insights
+
+Variational Autoencoders (VAEs) impose a predefined prior on the latent space, which encourages structured representations but can distort the learned distribution. This constraint pulls the latent space toward a fixed shape, often degrading reconstruction quality compared to unconstrained autoencoders. However, it enables sampling-based generation, making VAEs viable for generative modeling.
+
+VAEs perform reasonably well when the true data distribution is simple. However, for more complex distributions, the mismatch between the learned prior and the true data distribution can lead to significant degradation in sample quality. This highlights the challenge of designing priors that balance expressiveness and regularization, particularly in high-dimensional and diverse datasets.
+
+---
+
 
