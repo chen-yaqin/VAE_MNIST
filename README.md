@@ -13,7 +13,7 @@ All models were trained on the MNIST dataset with the following hyperparameters:
 - **Epochs:** 10  
 - **Latent Dimension (z)**: 20 (unless specified)  
 
-We evaluate the following autoencoder architectures:
+I evaluate the following autoencoder architectures:
 
 ### 1. **Variational Autoencoders (VAEs)**
    - `vae_std_z20`: A standard VAE ([PyTorch implementation](https://github.com/pytorch/examples/blob/main/vae/main.py)) with z=20.
@@ -28,13 +28,13 @@ We evaluate the following autoencoder architectures:
 
 ### 3. **Other Autoencoder Variants**
    - **WAE** (Wasserstein Autoencoder): Focuses on **distribution matching** instead of KL divergence.  
-   - **GM-VAE** (Gaussian Mixture VAE): Uses a mixture of Gaussian priors to model a more flexible latent space.
+   - **GM-VAE** (Gaussian Mixture VAE): Uses a mixture of Gaussian priors to model latent space.
 
 ---
 
 ## Metrics
 
-We evaluate each model using two key metrics:
+I evaluate each model using two key metrics:
 
 1. **MSE (Mean Squared Error)**: Measures reconstruction accuracy between input and output images.  
 2. **FID (Fréchet Inception Distance)**: Measures the quality of generated images. 
@@ -76,7 +76,7 @@ We evaluate each model using two key metrics:
 ## Tradeoff Analysis
 
 ### **1. Standard VAEs (Effect of Residuals & Latent Dim)**
-- **`vae_std_z20_res`** achieves the best FID (41.26), suggesting that **residual connections improve generative quality** by preserving more global structure.  
+- **`vae_std_z20_res`** achieves the best FID (41.26), suggesting that residual connections improve generative quality by preserving more global structure.  
 - **`vae_std_z40`** shows minimal improvement over `vae_std_z20`, indicating that increasing latent space does not always enhance performance on simple datasets like MNIST.  
 - **Batch Normalization** was tested but did not significantly improve results; however, it slowed training.
 
@@ -112,7 +112,7 @@ This study highlights the inherent tradeoff between reconstruction fidelity and 
 
 ## Additional Insights
 
-Variational Autoencoders (VAEs) impose a predefined prior on the latent space, which encourages structured representations but can distort the learned distribution. This constraint pulls the latent space toward a fixed shape, often degrading reconstruction quality compared to unconstrained autoencoders. However, it enables sampling-based generation, making VAEs viable for generative modeling.
+Variational Autoencoders (VAEs) impose a predefined prior on the latent space, which encourages structured representations but can distort the learned distribution. This constraint pulls the latent space toward a fixed shape, often degrading reconstruction quality. However, it enables sampling-based generation, making VAEs viable for generative modeling.
 
 VAEs perform reasonably well when the true data distribution is simple. However, for more complex distributions, the mismatch between the learned prior and the true data distribution can lead to significant degradation in sample quality. This highlights the challenge of designing priors that balance expressiveness and regularization, particularly in high-dimensional and diverse datasets.
 
